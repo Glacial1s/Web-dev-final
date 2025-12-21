@@ -8,6 +8,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
+import { apiUrl } from "./config.api";
 
 import TopBar from "./components/TopBar";
 import UserDetail from "./components/UserDetail";
@@ -24,7 +25,7 @@ const App = (props) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://localhost:8081/api/user/list", {
+      fetch(apiUrl("/user/list"), {
         headers: {
           Authorization: `Bearer ${token}`,
         },

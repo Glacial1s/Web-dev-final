@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { AppBar, Toolbar, Typography, Button, Box, Input } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import fetchModel from "../../lib/fetchModelData";
+import { apiUrl } from "../../config.api";
 
 import "./styles.css";
 
@@ -46,7 +47,7 @@ function TopBar({ user, onLogout, onPhotoUploaded }) {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-      await fetch("http://localhost:8081/api/admin/logout", {
+      await fetch(apiUrl("/admin/logout"), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -73,7 +74,7 @@ function TopBar({ user, onLogout, onPhotoUploaded }) {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8081/api/photo/new", {
+      const response = await fetch(apiUrl("/photo/new"), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

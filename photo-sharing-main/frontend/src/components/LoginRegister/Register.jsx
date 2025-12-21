@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { TextField, Button, Typography, Paper, Alert } from "@mui/material";
+import { apiUrl } from "../../config.api";
 
 const Register = () => {
   const [regLoginName, setRegLoginName] = useState("");
@@ -32,7 +33,7 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8081/api/user", {
+      const response = await fetch(apiUrl("/user"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

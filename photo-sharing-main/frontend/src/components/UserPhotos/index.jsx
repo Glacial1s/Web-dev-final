@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { useParams, Link } from "react-router-dom";
 import fetchModel from "../../lib/fetchModelData";
+import { apiUrl, serverUrl } from "../../config.api";
 
 import "./styles.css";
 
@@ -64,7 +65,7 @@ function UserPhotos({ photoUploadTrigger }) {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:8081/api/photo/commentsOfPhoto/${photoId}`,
+        apiUrl(`/photo/commentsOfPhoto/${photoId}`),
         {
           method: "POST",
           headers: {
@@ -98,7 +99,7 @@ function UserPhotos({ photoUploadTrigger }) {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:8081/api/photo/commentsOfPhoto/${photoId}/${commentId}`,
+        apiUrl(`/photo/commentsOfPhoto/${photoId}/${commentId}`),
         {
           method: "DELETE",
           headers: {
@@ -132,7 +133,7 @@ function UserPhotos({ photoUploadTrigger }) {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:8081/api/photo/commentsOfPhoto/${photoId}/${editingComment._id}`,
+        apiUrl(`/photo/commentsOfPhoto/${photoId}/${editingComment._id}`),
         {
           method: "PUT",
           headers: {
@@ -164,7 +165,7 @@ function UserPhotos({ photoUploadTrigger }) {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:8081/api/photo/${photoId}`,
+        apiUrl(`/photo/${photoId}`),
         {
           method: "DELETE",
           headers: {
@@ -189,7 +190,7 @@ function UserPhotos({ photoUploadTrigger }) {
       {photos.map((photo) => (
         <Card key={photo._id} style={{ marginBottom: "20px" }}>
           <CardMedia
-            src={`http://localhost:8081/images/${photo.file_name}`}
+            src={serverUrl(`/images/${photo.file_name}`)}
             component="img"
             height="400"
             alt={`Photo ${photo._id}`}
@@ -327,7 +328,7 @@ function UserPhotos({ photoUploadTrigger }) {
         <DialogContent style={{ padding: 0 }}>
           {viewingPhoto && (
             <img
-              src={`http://localhost:8081/images/${viewingPhoto.file_name}`}
+              src={serverUrl(`/images/${viewingPhoto.file_name}`)}
               alt="Full size"
               style={{ width: "100%", height: "auto", display: "block" }}
             />

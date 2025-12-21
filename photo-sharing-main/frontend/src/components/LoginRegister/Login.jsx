@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { TextField, Button, Typography, Paper, Alert } from "@mui/material";
+import { apiUrl } from "../../config.api";
 
 const Login = ({ onLogin }) => {
   const [loginName, setLoginName] = useState("");
@@ -16,7 +17,7 @@ const Login = ({ onLogin }) => {
     }
 
     try {
-      const response = await fetch("http://localhost:8081/api/admin/login", {
+      const response = await fetch(apiUrl("/admin/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

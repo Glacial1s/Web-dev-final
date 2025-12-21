@@ -1,3 +1,5 @@
+import { apiUrl } from "../config.api";
+
 /**
  * fetchModel - Fetch a model from the web server.
  *
@@ -7,7 +9,7 @@
 async function fetchModel(url) {
   const token = localStorage.getItem("token");
 
-  const models = await fetch("http://localhost:8081/api" + url, {
+  const models = await fetch(apiUrl(url), {
     headers: {
       Authorization: `Bearer ${token}`,
     },
