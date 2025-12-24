@@ -26,6 +26,7 @@ function UserPhotos({ photoUploadTrigger }) {
   const { userId } = useParams();
   const [photos, setPhotos] = useState([]);
   const [commentTexts, setCommentTexts] = useState({});
+  const [commentSearchTexts, setCommentSearchTexts] = useState({});
   const [editingComment, setEditingComment] = useState(null);
   const [editCommentText, setEditCommentText] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -41,7 +42,7 @@ function UserPhotos({ photoUploadTrigger }) {
 
   const fetchPhotos = async () => {
     const data = await fetchModel("/photo/user/" + userId);
-    setPhotos(data);
+    setPhotos(Array.isArray(data) ? data : []);
   };
 
   useEffect(() => {
@@ -53,6 +54,50 @@ function UserPhotos({ photoUploadTrigger }) {
       ...commentTexts,
       [photoId]: text,
     });
+  };
+
+  const handleCommentSearchChange = (photoId, text) => {
+    setCommentSearchTexts({
+      ...commentSearchTexts,
+      [photoId]: text,
+    });
+  };
+
+  const handleToggleLike = async (photoId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(apiUrl(`/photo/${photoId}/like`), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setPhotos((prevPhotos) =>
+          prevPhotos.map((photo) => {
+            if (photo._id !== photoId) return photo;
+            const existingLikes = Array.isArray(photo.likes) ? photo.likes : [];
+            const nextLikes = data.liked
+              ? [...existingLikes.filter(Boolean), currentUserId]
+              : existingLikes.filter(
+                  (likeUserId) =>
+                    likeUserId && likeUserId.toString() !== currentUserId
+                );
+            return {
+              ...photo,
+              likes: nextLikes,
+            };
+          })
+        );
+      } else {
+        alert("Failed to toggle like");
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      alert("Failed to toggle like");
+    }
   };
 
   const handleCommentSubmit = async (photoId) => {
@@ -206,20 +251,57 @@ function UserPhotos({ photoUploadTrigger }) {
               <Typography variant="caption" display="block" gutterBottom>
                 Posted on: {new Date(photo.date_time).toLocaleString()}
               </Typography>
-              {photo.user_id === currentUserId && (
+              <Box display="flex" alignItems="center" gap={1}>
                 <Button
-                  color="error"
                   size="small"
-                  onClick={() => handleDeletePhoto(photo._id)}
+                  variant="outlined"
+                  onClick={() => handleToggleLike(photo._id)}
                 >
-                  Delete Photo
+                  {(photo.likes || []).some(
+                    (likeUserId) =>
+                      likeUserId &&
+                      likeUserId.toString() === currentUserId?.toString()
+                  )
+                    ? "Unlike"
+                    : "Like"}
                 </Button>
-              )}
+                <Typography variant="body2">
+                  {(photo.likes || []).length} likes
+                </Typography>
+                {photo.user_id === currentUserId && (
+                  <Button
+                    color="error"
+                    size="small"
+                    onClick={() => handleDeletePhoto(photo._id)}
+                  >
+                    Delete Photo
+                  </Button>
+                )}
+              </Box>
             </Box>
 
             <Typography variant="h6">Comments:</Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="Search comments in this post..."
+              value={commentSearchTexts[photo._id] || ""}
+              onChange={(e) =>
+                handleCommentSearchChange(photo._id, e.target.value)
+              }
+              sx={{ mb: 1 }}
+            />
             <List dense>
-              {photo.comments?.map((comment) => (
+              {(photo.comments || [])
+                .filter((comment) => {
+                  const query = (commentSearchTexts[photo._id] || "")
+                    .trim()
+                    .toLowerCase();
+                  if (!query) return true;
+                  return comment.comment?.toLowerCase().includes(query);
+                })
+                .map((comment) => (
                 <React.Fragment key={comment._id}>
                   <ListItem alignItems="flex-start">
                     <ListItemText

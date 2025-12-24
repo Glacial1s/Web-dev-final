@@ -59,7 +59,7 @@ router.get("/user/:id", requireAuth, async (request, response) => {
     }
 
     const photos = await Photo.find({ user_id: userId })
-      .select("_id user_id comments file_name date_time")
+      .select("_id user_id comments file_name date_time likes")
       .exec();
 
     const processedPhotos = await Promise.all(
@@ -145,6 +145,7 @@ router.post(
         user_id: request.user_id,
         date_time: new Date(),
         comments: [],
+        likes: [],
       });
 
       await newPhoto.save();
@@ -254,8 +255,45 @@ router.delete("/:photo_id", requireAuth, async (request, response) => {
   }
 });
 
+router.post("/:photo_id/like", requireAuth, async (request, response) => {
+  const { photo_id } = request.params;
+  const userId = request.user_id;
+
+  try {
+    const photo = await Photo.findById(photo_id).exec();
+    if (!photo) {
+      return response.status(400).json({ error: "Photo not found" });
+    }
+
+    photo.likes = photo.likes || [];
+    const existingIndex = photo.likes.findIndex(
+      (likeUserId) => likeUserId.toString() === userId
+    );
+
+    let liked = false;
+    if (existingIndex >= 0) {
+      photo.likes.splice(existingIndex, 1);
+      liked = false;
+    } else {
+      photo.likes.push(userId);
+      liked = true;
+    }
+
+    await photo.save();
+
+    response.status(200).json({
+      liked,
+      likes_count: photo.likes.length,
+    });
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    response.status(400).json({ error: "Error toggling like" });
+  }
+});
+
 router.get("/commentsOf/:userId", requireAuth, async (request, response) => {
   const { userId } = request.params;
+  const query = (request.query.q || "").trim().toLowerCase();
 
   try {
     const user = await userModel.findById(userId).exec();
@@ -264,10 +302,27 @@ router.get("/commentsOf/:userId", requireAuth, async (request, response) => {
     }
 
     const photos = await Photo.find({ "comments.user_id": userId }).exec();
-    comments = [];
+    let comments = [];
 
     for (const photo of photos) {
-      comments.push(...photo.comments);
+      photo.comments.forEach((comment) => {
+        if (comment.user_id.toString() !== userId) return;
+        comments.push({
+          _id: comment._id,
+          comment: comment.comment,
+          date_time: comment.date_time,
+          user_id: comment.user_id,
+          photo_id: photo._id,
+          photo_file_name: photo.file_name,
+          photo_user_id: photo.user_id,
+        });
+      });
+    }
+
+    if (query) {
+      comments = comments.filter((comment) =>
+        comment.comment?.toLowerCase().includes(query)
+      );
     }
 
     response.json(comments);

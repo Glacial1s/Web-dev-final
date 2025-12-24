@@ -104,56 +104,77 @@ function TopBar({ user, onLogout, onPhotoUploaded }) {
   };
 
   return (
-    <AppBar className="topbar-appBar" position="absolute">
-      <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="h5" color="inherit">
-          B22DCAT036
-        </Typography>
-        <Typography variant="h5" color="inherit">
-          {contextMessage}
-        </Typography>
-        <Box>
-          {user ? (
-            <Box display="flex" alignItems="center" gap={2}>
-              <Typography variant="body1" color="inherit">
-                Hi {user.first_name}
-              </Typography>
-              <label htmlFor="photo-upload">
-                <Input
-                  id="photo-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  style={{ display: "none" }}
-                />
-                <Button variant="contained" component="span">
-                  Add Photo
+    <>
+      <AppBar className="topbar-appBar" position="absolute">
+        <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography variant="h5" color="inherit">
+            B22DCAT036
+          </Typography>
+          <Typography variant="h5" color="inherit">
+            {contextMessage}
+          </Typography>
+          <Box>
+            {user ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                <Typography variant="body1" color="inherit">
+                  Hi {user.first_name}
+                </Typography>
+                <label htmlFor="photo-upload">
+                  <Input
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    style={{ display: "none" }}
+                  />
+                  <Button variant="contained" component="span">
+                    Add Photo
+                  </Button>
+                </label>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleLogout}
+                >
+                  Logout
                 </Button>
-              </label>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
-            </Box>
-          ) : (
-            <Typography variant="body1" color="inherit">
-              Please Login
-            </Typography>
-          )}
-        </Box>
-      </Toolbar>
-      {uploadError && (
-        <Typography
-          color="error"
-          style={{ textAlign: "center", padding: "5px" }}
-        >
-          {uploadError}
-        </Typography>
-      )}
-    </AppBar>
+              </Box>
+            ) : (
+              <Typography variant="body1" color="inherit">
+                Please Login
+              </Typography>
+            )}
+          </Box>
+        </Toolbar>
+        {uploadError && (
+          <Typography
+            color="error"
+            style={{ textAlign: "center", padding: "5px" }}
+          >
+            {uploadError}
+          </Typography>
+        )}
+      </AppBar>
+      <Box
+        sx={{
+          mt: "75px",
+          px: 1,
+          pb: 1,
+          display: "flex",
+          gap: 1,
+          justifyContent: "flex-start",
+        }}
+      >
+        <Button variant="outlined" onClick={() => navigate("/")}>
+          Home
+        </Button>
+        {user && (
+          <Button variant="outlined" onClick={() => navigate("/profile")}>
+            View Profile
+          </Button>
+        )}
+      </Box>
+    </>
   );
 }
 
